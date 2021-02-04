@@ -1248,7 +1248,6 @@ else:
     let tmPtr = localtime(a)
     if not tmPtr.isNil:
       let tm = tmPtr[]
-      echo a.int64, " -> ", tm
       return ((a.int64 - tm.toAdjUnix).int, tm.tm_isdst > 0)
     return (0, false)
 

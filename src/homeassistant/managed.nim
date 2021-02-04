@@ -55,10 +55,13 @@ proc checkEvent(home: HomeAssistant, message: JsonNode) =
       handler.callback(message["event"]["data"])
 
 proc runLoop*(home: HomeAssistant) {.async.} =
-  while true:
+  while home.base.socket.readyState != Closed:
     var response = ""
     while response.len == 0:
-      response = await home.base.socket.receiveStrPacket()
+      try:
+        response = await home.base.socket.receiveStrPacket()
+      except WebSocketError:
+        if home.base.socket.readyState == Closed: return
     var message: JsonNode
     try: message = parseJson(response) except: continue
     if message["id"].num in home.eventHandlers:
