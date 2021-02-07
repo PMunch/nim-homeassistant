@@ -3,7 +3,7 @@ import ws
 import base
 
 type
-  EventCallback* = proc (node: JsonNode)
+  EventCallback* = proc (node: JsonNode) {.async.}
   EventHandler* = object
     eventType: string
     matches: JsonNode
@@ -46,13 +46,13 @@ proc compareNode(left, right: JsonNode): bool =
       if not compareNode(value, right[key]):
         return false
 
-proc checkEvent(home: HomeAssistant, message: JsonNode) =
+proc checkEvent(home: HomeAssistant, message: JsonNode) {.async.} =
   var handlers = home.eventHandlers[message["id"].num]
   for handler in handlers:
     if handler.matches == nil:
-      handler.callback(message["event"]["data"])
+      await handler.callback(message["event"]["data"])
     elif compareNode(handler.matches, message["event"]["data"]):
-      handler.callback(message["event"]["data"])
+      await handler.callback(message["event"]["data"])
 
 proc runLoop*(home: HomeAssistant) {.async.} =
   while home.base.socket.readyState != Closed:
@@ -65,7 +65,7 @@ proc runLoop*(home: HomeAssistant) {.async.} =
     var message: JsonNode
     try: message = parseJson(response) except: continue
     if message["id"].num in home.eventHandlers:
-      home.checkEvent(message)
+      await home.checkEvent(message)
     else:
       home.base.messages.append(message)
 
