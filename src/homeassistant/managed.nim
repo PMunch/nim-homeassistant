@@ -50,9 +50,9 @@ proc checkEvent(home: HomeAssistant, message: JsonNode) {.async.} =
   var handlers = home.eventHandlers[message["id"].num]
   for handler in handlers:
     if handler.matches == nil:
-      await handler.callback(message["event"]["data"])
+      asyncCheck handler.callback(message["event"]["data"])
     elif compareNode(handler.matches, message["event"]["data"]):
-      await handler.callback(message["event"]["data"])
+      asyncCheck handler.callback(message["event"]["data"])
 
 proc runLoop*(home: HomeAssistant) {.async.} =
   while home.base.socket.readyState != Closed:
