@@ -1,8 +1,6 @@
-import asyncdispatch, json, strutils, lists
+import asyncdispatch, json, strutils, lists, os
 import ws
 #import "./times.nim"
-
-const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIyOTllNGFhYzQ4MDE0YTE2YWRjNDY5YTYxNDQ3YTRkZiIsImlhdCI6MTYxMTE0MDc0NCwiZXhwIjoxOTI2NTAwNzQ0fQ.IaF1UQSAsUiDJuXytIP3GXXhnrmLvh55N7eI3weqmMY"
 
 type
   Device = object
@@ -30,6 +28,9 @@ proc initHome*(address, token: string): Future[HomeAssistant] {.async.} =
   assert response["type"].str == "auth_ok"
   result.messages = initDoublyLinkedList[JsonNode]()
   result.messageId = 1
+
+template initHome*(): untyped =
+  initHome("ws://supervisor/core/websocket", getEnv("SUPERVISOR_TOKEN"))
 
 proc runLoop*(home: HomeAssistant) {.async.} =
   while true:

@@ -20,6 +20,10 @@ proc initHome*(address, token: string): Future[HomeAssistant] {.async.} =
   new result
   result.base = await base.initHome(address, token)
 
+proc initHome*(): Future[HomeAssistant] {.async.} =
+  new result
+  result.base = await base.initHome()
+
 proc onEvent*(home: HomeAssistant, eventType: string, matches: JsonNode, callback: EventCallback) {.async.} =
   if not home.eventIds.hasKey(eventType):
     home.eventIds[eventType] = await home.base.sendRecurringMessage(%*{"type": "subscribe_events", "event_type": eventType})
